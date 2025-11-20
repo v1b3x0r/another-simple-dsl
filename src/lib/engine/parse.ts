@@ -1,16 +1,22 @@
+export type RuleCategory = 'flow' | 'guard' | 'effect' | 'system';
+
 export type Rule = {
 	type: 'rule';
 	condition: string;
 	action: string;
+	category: RuleCategory;
+	label?: string;
 };
 
 export type SceneDefinition = {
 	id: string;
 	description: string;
 	actions: string[];
+	hint?: string;
 };
 
 export type ParsedDSL = {
+	world?: string;
 	rules: Rule[];
 	scenes: Record<string, SceneDefinition>;
 };
@@ -26,31 +32,49 @@ const parseActions = (raw: string | undefined): string[] => {
 		.map((token) => stripQuotes(token.replace(/,$/, '')));
 };
 
+const annotationToCategory = (annotation?: string): RuleCategory => {
+	if (!annotation) return 'flow';
+	const token = annotation.replace(/^@/, '').toLowerCase();
+	if (token === 'guard' || token === 'physics') return 'guard';
+	if (token === 'effect') return 'effect';
+	if (token === 'system') return 'system';
+	return 'flow';
+};
+
 export function parseDSL(text: string): ParsedDSL {
+	const normalized = text.replace(/\r\n/g, '\n');
+	const worldMatch = normalized.match(/world\s+([a-zA-Z0-9_-]+)\s*\{([\s\S]*)\}\s*$/);
+	const sourceBody = worldMatch ? worldMatch[2] : normalized;
+	const worldName = worldMatch?.[1];
+
 	const rules: Rule[] = [];
 	const scenes: Record<string, SceneDefinition> = {};
 
-	for (const match of text.matchAll(/scene\s+([a-zA-Z0-9_-]+)\s*\{([\s\S]*?)\}/g)) {
+	for (const match of sourceBody.matchAll(/scene\s+([a-zA-Z0-9_-]+)\s*\{([\s\S]*?)\}/g)) {
 		const [, sceneId, body] = match;
 		const descriptionMatch = body.match(/description:\s*"([^"]*)"/);
 		const actionsMatch = body.match(/actions:\s*\[([\s\S]*?)\]/);
+		const hintMatch = body.match(/hint:\s*"([^"]*)"/);
 
 		scenes[sceneId] = {
 			id: sceneId,
 			description: descriptionMatch ? descriptionMatch[1] : '',
-			actions: parseActions(actionsMatch ? actionsMatch[1] : undefined)
+			actions: parseActions(actionsMatch ? actionsMatch[1] : undefined),
+			hint: hintMatch ? hintMatch[1] : undefined
 		};
 	}
 
-	for (const match of text.matchAll(/when\s+(.+?)\s+leadsTo\s+(.+)/g)) {
-		const [, condition, action] = match;
+	const ruleRegex = /(@[a-zA-Z0-9_-]+)?\s*when\s+(.+?)\s+leadsTo\s+(.+)/g;
+	for (const match of sourceBody.matchAll(ruleRegex)) {
+		const [, annotation, condition, action] = match;
 
 		rules.push({
 			type: 'rule',
 			condition: condition.trim(),
-			action: action.trim()
+			action: action.trim(),
+			category: annotationToCategory(annotation)
 		});
 	}
 
-	return { rules, scenes };
+	return { world: worldName, rules, scenes };
 }

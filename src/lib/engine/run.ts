@@ -1,6 +1,6 @@
-import type { Rule } from './parse';
-import { applyEffect } from './effects';
-import { createInitialState, getCounterValue, type DreamState } from './state';
+import type { Rule } from './parse.ts';
+import { applyEffect } from './effects.ts';
+import { createInitialState, getCounterValue, type DreamState } from './state.ts';
 
 export type TriggerRecord = {
 	event: string;
@@ -8,6 +8,9 @@ export type TriggerRecord = {
 	sceneBefore: string;
 	sceneAfter: string;
 	counters: Record<string, number>;
+	messages: string[];
+	finished: string | null;
+	blocked: boolean;
 	timestamp: number;
 };
 
@@ -36,6 +39,9 @@ export class DreamEngine {
 			sceneBefore,
 			sceneAfter,
 			counters: { ...this.state.counters },
+			messages: [...this.state.messages],
+			finished: this.state.finished,
+			blocked: this.state.blocked,
 			timestamp: Date.now()
 		});
 

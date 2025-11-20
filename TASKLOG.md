@@ -11,3 +11,6 @@
 - Introduced stateful counters + condition evaluator (supporting keys/boxes) and rewrote DSL in plain Gen-Z tone for the “green vs red box” mini-game with glitch door + gate checks.
 - Added shared humanize utils plus a journey tracker UI in `+page.svelte` to visualize current layer vs. the rest of the dream stack.
 - Removed obsolete scene-specific components and imports so the sandbox uses the generic `SceneFrame` for all DSL-defined scenes.
+- Added world-scoped DSL with rule annotations (`@flow/@guard/@effect`) + scene hints, wired into parser + UI, and refreshed README to document the syntax.
+- Implemented effect registry + richer DreamState (messages, finish flag, block), updated UI HUD to surface counters/messages, and logged the upgrades in README.
+- Added `node:test` harness (`tests/dreamflow.test.mjs`) with ts-node loader to assert parser metadata, guard logic, and full progression; wired via `npm run test`.

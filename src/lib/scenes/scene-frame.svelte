@@ -14,6 +14,9 @@
 	<header class="space-y-1">
 		<h2 class="text-xl font-semibold">{sceneTitle(scene.id)}</h2>
 		<p class="text-sm text-white/75">{scene.description}</p>
+		{#if scene.hint}
+			<p class="text-xs uppercase tracking-wide text-white/60">{scene.hint}</p>
+		{/if}
 	</header>
 
 	<div class="flex flex-col gap-3">

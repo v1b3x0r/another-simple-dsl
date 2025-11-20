@@ -1,38 +1,48 @@
-# Dream Engine - The Most 
+# Dreamflow Sandbox (super alpha)
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Playground สำหรับออกแบบ story flow ผ่าน DSL ภาษาคน Gen Z — เขียนกติกาฝันในไฟล์ `.dsl` แล้วให้ DreamEngine รันเป็น state machine บน SvelteKit
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
+```bash
+pnpm install
+pnpm dev
 
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+# run unit tests
+npm run test
 ```
 
-## Developing
+เปิด `http://localhost:5173` แล้วลองกดปุ่มเพื่อข้าม layer ต่างๆ พร้อมดู state log ใน DevTools console
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## DSL Cheat Sheet
 
-```sh
-npm run dev
+```dsl
+world Dreamflow2025 {
+  scene lobby {
+    description: "ฐานบัญชาการ neon"
+    hint: "เลือกเส้นแล้วไปให้สุด"
+    actions: ["user.enterLayerOne", "user.takeWeirdSlide"]
+  }
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+  @flow when user.enterLayerOne leadsTo goto("layer1")
+  @effect when user.grabGreenBox leadsTo reveal("greenBox")
+  @guard when user.warpToFinalGate and greenBox >= 1 and redBox >= 1 leadsTo goto("finalGate")
+}
 ```
 
-## Building
+- `world <name> { ... }` ระบุ scope ของ flow
+- `scene <id> { description, hint?, actions[] }` = Single Source of Truth ของ UI
+- `@flow/@guard/@effect` คือ annotation ใน rule (ถ้าไม่ระบุ default = `flow`)
+- `goto("sceneId")` เปลี่ยนฉาก, `reveal("counterName")` เพิ่มค่า state counter
 
-To create a production version of your app:
+## Engine Features
 
-```sh
-npm run build
-```
+- Parser แยก world/scenes/rules พร้อมดึง hint/action list ให้ UI render อัตโนมัติ
+- DreamEngine มี evaluator สำหรับ condition (`scene`, counters, และเปรียบเทียบตัวเลข) พร้อม effect registry (`goto`, `reveal`, `announce`, `finish`, ฯลฯ)
+- Journey tracker + HUD โชว์ layer ปัจจุบัน, counters (ของที่เก็บ) และข้อความจากระบบ
 
-You can preview the production build with `npm run preview`.
+## Next Steps
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- เปิด API ให้ register effect เพิ่มเติมแบบ plugin + ตัวช่วยตรวจ type
+- ทำ CLI lint/dry-run DSL
+- ขยายเอกสาร + sample world ใหม่ (signup flow, tutorial ฯลฯ)
