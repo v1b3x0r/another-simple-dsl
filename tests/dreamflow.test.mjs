@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const { parseDSL } = await import('../src/lib/engine/parse.ts');
 const { DreamEngine } = await import('../src/lib/engine/run.ts');
 
-const dslSource = await readFile(new URL('../src/rules/dreamflow.dsl', import.meta.url), 'utf8');
+const dslSource = await readFile(new URL('../src/worlds/dreamflow.dsl', import.meta.url), 'utf8');
 const parsed = parseDSL(dslSource);
 
 const buildEngine = () => new DreamEngine(parsed.rules);
